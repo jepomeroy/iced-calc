@@ -1,4 +1,4 @@
-# Cosmic-esque Calculator
+# Iced Calculator
 
 A calculator application for the [COSMIC][cosmic] desktop environment, built with [libcosmic][libcosmic] and Rust.
 
@@ -16,27 +16,27 @@ This is not associated with Pop OS, Cosmic, or System 76. It implements a Cosmic
 
 The project is split into two crates:
 
-| Crate | Purpose |
-|---|---|
-| `cosmic-calculator` (root) | COSMIC/Iced GUI application |
-| `calclib` | Standalone expression engine — lexer, parser, AST, and evaluator with no GUI dependencies |
+| Crate              | Purpose                                                                                   |
+| ------------------ | ----------------------------------------------------------------------------------------- |
+| `iced-calc` (root) | COSMIC/Iced GUI application                                                               |
+| `calclib`          | Standalone expression engine — lexer, parser, AST, and evaluator with no GUI dependencies |
 
 ## Building
 
 Requires a Rust toolchain (install via [rustup][rustup]). A [justfile](./justfile) is provided for the [just][just] command runner:
 
-| Command | Description |
-|---|---|
-| `just` | Build the release binary (default recipe) |
-| `just run` | Build and run the application |
-| `just build-debug` | Build with the debug profile |
-| `just test` | Run all tests across the workspace |
-| `just test-app` | Run only the app crate tests |
-| `just test-lib` | Run only the `calclib` tests |
-| `just test-watch` | Continuously run `calclib` unit tests with [bacon][bacon] |
-| `just check` | Run clippy with pedantic warnings |
-| `just check-json` | Clippy with JSON output for IDE/LSP integration |
-| `just clean` | Run `cargo clean` |
+| Command            | Description                                               |
+| ------------------ | --------------------------------------------------------- |
+| `just`             | Build the release binary (default recipe)                 |
+| `just run`         | Build and run the application                             |
+| `just build-debug` | Build with the debug profile                              |
+| `just test`        | Run all tests across the workspace                        |
+| `just test-app`    | Run only the app crate tests                              |
+| `just test-lib`    | Run only the `calclib` tests                              |
+| `just test-watch`  | Continuously run `calclib` unit tests with [bacon][bacon] |
+| `just check`       | Run clippy with pedantic warnings                         |
+| `just check-json`  | Clippy with JSON output for IDE/LSP integration           |
+| `just clean`       | Run `cargo clean`                                         |
 
 ## Installation
 
@@ -64,7 +64,7 @@ For distribution packaging, vendor dependencies and build offline:
 ```sh
 just vendor
 just build-vendored
-just rootdir=debian/cosmic-calculator prefix=/usr install
+just rootdir=debian/iced-calc prefix=/usr install
 ```
 
 It is recommended to create the vendored tarball on the host system before entering a sandboxed build environment.

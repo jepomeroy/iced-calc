@@ -1,4 +1,4 @@
-app-title = Cosmic Calculator
+app-title = Iced Calculator
 about = About
 repository = Repository
 view = View

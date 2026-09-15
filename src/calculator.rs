@@ -11,7 +11,7 @@ pub(crate) fn evaluate_input(input: &str, numformat: NumberFormat) -> EvalResult
         .replace('×', "*")
         .replace('÷', "/")
         .replace('−', "-")
-        .replace('π', format!("({})", &std::f64::consts::PI).as_str())
+        .replace('π', format!("({})", std::f64::consts::PI).as_str())
         .replace('²', "^2")
         .replace('³', "^3")
         .replace('√', "sqrt")
