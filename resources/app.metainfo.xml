@@ -1,19 +1,19 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <component type="desktop-application">
-  <id>com.github.jepomeroy.cosmic-calculator</id>
+  <id>com.github.jepomeroy.iced-calc</id>
   <metadata_license>CC0-1.0</metadata_license>
   <project_license>MIT</project_license>
-  <name>Cosmic Calculator</name>
-  <summary>Cosmic Desktop Calculator</summary>
+  <name>Iced Calculator</name>
+  <summary>Iced Desktop Calculator</summary>
   <icon type="remote" width="64" height="64" scale="1">
-    https://github.com/jepomeroy/cosmic-calculator/raw/main/resources/icons/hicolor/scalable/apps/icon.svg
+    https://github.com/jepomeroy/iced-calc/raw/main/resources/icons/hicolor/scalable/apps/icon.svg
   </icon>
-  <url type="vcs-browser">https://github.com/jepomeroy/cosmic-calculator</url>
-  <launchable type="desktop-id">com.github.jepomeroy.cosmic-calculator.desktop</launchable>
+  <url type="vcs-browser">https://github.com/jepomeroy/iced-calc</url>
+  <launchable type="desktop-id">com.github.jepomeroy.iced-calc.desktop</launchable>
   <provides>
-    <id>com.github.jepomeroy.cosmic-calculator</id>
+    <id>com.github.jepomeroy.iced-calc</id>
     <binaries>
-      <binary>cosmic-calculator</binary>
+      <binary>iced-calc</binary>
     </binaries>
   </provides>
   <requires>
@@ -25,10 +25,12 @@
     <control>touch</control>
   </supports>
   <categories>
-    <category>COSMIC</category>
+    <category>Utility</category>
+    <category>Calculator</category>
   </categories>
   <keywords>
-    <keyword>COSMIC</keyword>
+    <keyword>calculator</keyword>
+    <keyword>math</keyword>
   </keywords>
   <content_rating type="oars-1.1" />
 </component>

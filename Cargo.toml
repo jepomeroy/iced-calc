@@ -3,11 +3,46 @@ members = [".", "calclib"]
 
 [package]
 name = "iced-calc"
-version = "0.4.0"
+version = "0.5.0"
 edition = "2024"
 license = "MIT"
 description = "Iced Desktop Calculator"
 repository = "https://github.com/jepomeroy/iced-calc"
+
+[package.metadata.deb]
+# Debian package name (what users `apt install`)
+name = "iced-calc"
+maintainer = "Jon Pomeroy <earl.pomeroy42@gmail.com>"
+copyright = "2026, Jon Pomeroy"
+# Full license text goes into /usr/share/doc/iced-calc/copyright
+license-file = ["LICENSE", "0"]
+section = "utils"
+priority = "optional"
+extended-description = "A desktop calculator built with Iced and Rust."
+# $auto covers directly-linked libs; the rest are dlopen'd at runtime (windowing + GPU).
+depends = "$auto, libwayland-client0, libxkbcommon-x11-0, libx11-6, libxcursor1, libxrandr2, libxi6, libegl1 | libvulkan1"
+assets = [
+    [
+        "target/release/iced-calc",
+        "usr/bin/iced-calc",
+        "755",
+    ],
+    [
+        "resources/app.desktop",
+        "usr/share/applications/com.github.jepomeroy.iced-calc.desktop",
+        "644",
+    ],
+    [
+        "resources/app.metainfo.xml",
+        "usr/share/metainfo/com.github.jepomeroy.iced-calc.metainfo.xml",
+        "644",
+    ],
+    [
+        "resources/icons/hicolor/scalable/apps/icon.svg",
+        "usr/share/icons/hicolor/scalable/apps/com.github.jepomeroy.iced-calc.svg",
+        "644",
+    ],
+]
 
 [dependencies]
 futures-util = "0.3.34"
@@ -16,9 +51,9 @@ i18n-embed = { version = "0.16", features = [
     "desktop-requester",
 ] }
 i18n-embed-fl = "0.10"
-open = "5.4.4"
-rust-embed = "8.12.0"
-tokio = { version = "1.53.1", features = ["full"] }
+open = "5.4.5"
+rust-embed = "8.14.0"
+tokio = { version = "1.54.1", features = ["full"] }
 calclib = { path = "calclib" }
 
 [dependencies.libcosmic]

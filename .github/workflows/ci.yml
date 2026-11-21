@@ -1,0 +1,95 @@
+name: CI
+
+on:
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+# Cancel superseded runs when a PR gets new commits.
+concurrency:
+  group: ci-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  version:
+    name: Version bumped
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          fetch-tags: true
+
+      # PRs that only touch docs/CI/tooling won't be released, so need no bump.
+      - name: Check whether this PR will produce a release
+        id: changes
+        if: github.event_name == 'pull_request'
+        env:
+          BASE_REF: ${{ github.base_ref }}
+        run: scripts/needs-release.sh "$(git merge-base "origin/$BASE_REF" HEAD)" HEAD
+
+      - name: Read base branch version
+        id: base
+        if: github.event_name == 'pull_request' && steps.changes.outputs.release == 'true'
+        env:
+          BASE_REF: ${{ github.base_ref }}
+        run: |
+          git show "origin/$BASE_REF:Cargo.toml" > "$RUNNER_TEMP/base-Cargo.toml"
+          version=$(sed -n '/^\[package\]/,/^\[/{s/^version *= *"\(.*\)"/\1/p}' "$RUNNER_TEMP/base-Cargo.toml" | head -n1)
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+
+      - name: Check version is new
+        if: steps.changes.outputs.release != 'false'
+        run: scripts/check-version.sh "${{ steps.base.outputs.version }}"
+
+      - name: Version bump not required
+        if: steps.changes.outputs.release == 'false'
+        run: echo "::notice::Only non-release files changed; no version bump required."
+
+  fmt:
+    name: rustfmt
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: rustfmt
+      - run: cargo fmt --all --check
+
+  clippy:
+    name: Clippy
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            pkg-config libxkbcommon-dev libwayland-dev libexpat1-dev \
+            libfontconfig-dev libfreetype-dev
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: clippy
+      - uses: Swatinem/rust-cache@v2
+      - run: cargo clippy --workspace --all-targets --all-features --locked -- -D warnings
+
+  test:
+    name: Tests
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            pkg-config libxkbcommon-dev libwayland-dev libexpat1-dev \
+            libfontconfig-dev libfreetype-dev
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+      - run: cargo test --workspace --locked

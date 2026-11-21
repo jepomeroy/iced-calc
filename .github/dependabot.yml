@@ -1,0 +1,26 @@
+version: 2
+updates:
+  # Rust crates (Cargo.toml / Cargo.lock). Git dependencies like libcosmic
+  # are not tracked by Dependabot; update those with `cargo update -p libcosmic`.
+  - package-ecosystem: cargo
+    directory: /
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 5
+    commit-message:
+      prefix: deps
+    groups:
+      # One PR per week for all semver-compatible updates.
+      cargo-minor-patch:
+        update-types: [minor, patch]
+
+  # Action versions used in .github/workflows
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+    commit-message:
+      prefix: ci
+    groups:
+      github-actions:
+        patterns: ["*"]

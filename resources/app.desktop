@@ -1,11 +1,11 @@
 [Desktop Entry]
-Name=Cosmic Calculator
-Comment=Cosmic Desktop Calculator
+Name=Iced Calculator
+Comment=Iced Desktop Calculator
 Type=Application
-Icon=com.github.jepomeroy.cosmic-calculator
-Exec=cosmic-calculator %F
+Icon=com.github.jepomeroy.iced-calc
+Exec=iced-calc %F
 Terminal=false
 StartupNotify=true
-Categories=COSMIC
-Keywords=COSMIC
+Categories=Utility;Calculator;
+Keywords=calculator;math;
 MimeType=

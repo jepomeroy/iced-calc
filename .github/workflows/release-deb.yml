@@ -1,0 +1,136 @@
+name: Release .deb
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+# Never run two releases at once (they would race on the tag and the apt repo).
+concurrency:
+  group: release-deb-${{ github.ref }}
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  version-check:
+    name: Check Cargo.toml version is new
+    runs-on: ubuntu-24.04
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+      release: ${{ steps.changes.outputs.release }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          fetch-tags: true
+
+      # Skip releasing when only docs/CI/tooling changed (see scripts/needs-release.sh).
+      # Manual runs (workflow_dispatch) always release.
+      - name: Check whether this push needs a release
+        id: changes
+        env:
+          BEFORE: ${{ github.event_name == 'push' && github.event.before || '' }}
+        run: scripts/needs-release.sh "$BEFORE" "$GITHUB_SHA"
+
+      - name: Fail if version was already released
+        id: version
+        if: steps.changes.outputs.release == 'true'
+        run: scripts/check-version.sh
+
+  build:
+    name: Build .deb (${{ matrix.arch }})
+    needs: version-check
+    if: needs.version-check.outputs.release == 'true'
+    strategy:
+      fail-fast: true
+      matrix:
+        include:
+          - arch: amd64
+            runner: ubuntu-24.04
+          - arch: arm64
+            runner: ubuntu-24.04-arm
+    runs-on: ${{ matrix.runner }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            pkg-config libxkbcommon-dev libwayland-dev libexpat1-dev \
+            libfontconfig-dev libfreetype-dev
+
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+      - uses: taiki-e/install-action@v2
+        with:
+          tool: cargo-deb
+
+      - name: Build package
+        run: cargo deb --locked
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: deb-${{ matrix.arch }}
+          path: target/debian/*.deb
+          if-no-files-found: error
+
+  release:
+    name: Tag, release, and publish apt repo
+    if: github.ref == 'refs/heads/main' && needs.version-check.outputs.release == 'true'
+    needs: [version-check, build]
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: write   # create tag + release
+      pages: write      # deploy apt repo
+      id-token: write   # required by deploy-pages
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+    env:
+      VERSION: ${{ needs.version-check.outputs.version }}
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: deb-*
+          merge-multiple: true
+          path: new-deb
+
+      - name: Create GitHub release
+        run: |
+          gh release create "v$VERSION" new-deb/*.deb \
+            --target "$GITHUB_SHA" \
+            --title "v$VERSION" \
+            --generate-notes
+
+      - name: Collect all released .debs
+        run: |
+          mkdir -p repo/pool/main
+          for tag in $(gh release list --limit 1000 --json tagName -q '.[].tagName'); do
+            gh release download "$tag" --pattern '*.deb' --dir repo/pool/main --skip-existing
+          done
+          ls -l repo/pool/main
+
+      - name: Import signing key
+        env:
+          APT_GPG_PRIVATE_KEY: ${{ secrets.APT_GPG_PRIVATE_KEY }}
+        run: |
+          echo "$APT_GPG_PRIVATE_KEY" | gpg --batch --import
+          keyid=$(gpg --list-secret-keys --with-colons | awk -F: '/^sec/ {print $5; exit}')
+          echo "KEYID=$keyid" >> "$GITHUB_ENV"
+
+      - name: Build apt repository
+        run: scripts/build-apt-repo.sh repo "$KEYID"
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: repo
+
+      - name: Deploy to GitHub Pages
+        id: deploy
+        uses: actions/deploy-pages@v4
