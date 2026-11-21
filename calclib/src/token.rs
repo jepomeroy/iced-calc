@@ -42,6 +42,28 @@ pub(crate) const PREFIX: u8 = 30;
 pub(crate) const EXPONENT: u8 = 40;
 pub(crate) const PARENTHETICAL: u8 = 50;
 
+impl Token {
+    pub(crate) fn precedence(&self) -> u8 {
+        match self {
+            Token::Eof => EOF,
+            Token::And
+            | Token::Or
+            | Token::Nand
+            | Token::Nor
+            | Token::Xor
+            | Token::Xnor
+            | Token::Lshift
+            | Token::Rshift
+            | Token::Mod => BIT,
+            Token::Plus | Token::Minus => ADD,
+            Token::Multiply | Token::Divide | Token::Exclamation => MULTIPLY,
+            Token::Caret => EXPONENT,
+            Token::LParen => PARENTHETICAL,
+            _ => LOWEST,
+        }
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -82,30 +104,11 @@ mod tests {
 
     #[test]
     fn test_bitwise_precedence_is_lower_than_arithmetic() {
-        assert!(BIT < ADD);
-        assert!(BIT < MULTIPLY);
-        assert!(BIT < EXPONENT);
-    }
-}
-
-impl Token {
-    pub(crate) fn precedence(&self) -> u8 {
-        match self {
-            Token::Eof => EOF,
-            Token::And
-            | Token::Or
-            | Token::Nand
-            | Token::Nor
-            | Token::Xor
-            | Token::Xnor
-            | Token::Lshift
-            | Token::Rshift
-            | Token::Mod => BIT,
-            Token::Plus | Token::Minus => ADD,
-            Token::Multiply | Token::Divide | Token::Exclamation => MULTIPLY,
-            Token::Caret => EXPONENT,
-            Token::LParen => PARENTHETICAL,
-            _ => LOWEST,
+        // Checked at compile time: these are constants.
+        const {
+            assert!(BIT < ADD);
+            assert!(BIT < MULTIPLY);
+            assert!(BIT < EXPONENT);
         }
     }
 }

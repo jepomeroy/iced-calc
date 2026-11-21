@@ -67,7 +67,7 @@ impl cosmic::Application for AppModel {
     type Message = Message;
 
     /// Unique identifier in RDNN (reverse domain name notation) format.
-    const APP_ID: &'static str = "com.github.jepomeroy.cosmic-calculator";
+    const APP_ID: &'static str = "com.github.jepomeroy.iced-calc";
 
     fn core(&self) -> &cosmic::Core {
         &self.core
