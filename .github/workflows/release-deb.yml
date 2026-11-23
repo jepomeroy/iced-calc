@@ -21,7 +21,7 @@ jobs:
       version: ${{ steps.version.outputs.version }}
       release: ${{ steps.changes.outputs.release }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           fetch-depth: 0
           fetch-tags: true
@@ -53,7 +53,7 @@ jobs:
             runner: ubuntu-24.04-arm
     runs-on: ${{ matrix.runner }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: Install system dependencies
         run: |
@@ -71,7 +71,7 @@ jobs:
       - name: Build package
         run: cargo deb --locked
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: deb-${{ matrix.arch }}
           path: target/debian/*.deb
@@ -93,9 +93,9 @@ jobs:
       VERSION: ${{ needs.version-check.outputs.version }}
       GH_TOKEN: ${{ github.token }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v8
         with:
           pattern: deb-*
           merge-multiple: true
@@ -127,10 +127,10 @@ jobs:
       - name: Build apt repository
         run: scripts/build-apt-repo.sh repo "$KEYID"
 
-      - uses: actions/upload-pages-artifact@v3
+      - uses: actions/upload-pages-artifact@v5
         with:
           path: repo
 
       - name: Deploy to GitHub Pages
         id: deploy
-        uses: actions/deploy-pages@v4
+        uses: actions/deploy-pages@v5
