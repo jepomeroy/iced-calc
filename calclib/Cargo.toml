@@ -1,8 +1,8 @@
 [package]
 name = "calclib"
-version = "0.3.0"
+version = "0.5.1"
 edition = "2024"
 
 [dependencies]
 statrs = "0.19.1"
-thiserror = "2.0.20"
+thiserror = "2.0.21"
